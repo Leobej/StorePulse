@@ -1,0 +1,20 @@
+meta {
+  name: Import sales
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/imports/sales
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  file: @file(C:\Users\leona\Desktop\example.csv)
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
