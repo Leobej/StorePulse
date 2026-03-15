@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:15
+    container_name: storepulse_db
+    environment:
+      POSTGRES_DB: storepulse
+      POSTGRES_USER: storepulse
+      POSTGRES_PASSWORD: storepulse
+    ports:
+      - "5432:5432"
+    volumes:
+      - storepulse_pg:/var/lib/postgresql/data
+
+volumes:
+  storepulse_pg:

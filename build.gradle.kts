@@ -1,20 +1,14 @@
-plugins {
-    id("java")
+allprojects {
+    group = "org.projects"
+    version = "0.1.0"
+    repositories { mavenCentral() }
 }
 
-group = "org.projects"
-version = "1.0-SNAPSHOT"
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
-
-tasks.test {
-    useJUnitPlatform()
+subprojects {
+    plugins.withId("java") {
+        extensions.configure<JavaPluginExtension> {
+            toolchain { languageVersion.set(JavaLanguageVersion.of(21)) }
+        }
+        tasks.withType<Test> { useJUnitPlatform() }
+    }
 }
