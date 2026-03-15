@@ -2,14 +2,61 @@ services:
   db:
     image: postgres:15
     container_name: storepulse_db
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: storepulse
-      POSTGRES_USER: storepulse
-      POSTGRES_PASSWORD: storepulse
+      POSTGRES_DB: ${STOREPULSE_DB_NAME}
+      POSTGRES_USER: ${STOREPULSE_DB_USERNAME}
+      POSTGRES_PASSWORD: ${STOREPULSE_DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - storepulse_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${STOREPULSE_DB_USERNAME} -d ${STOREPULSE_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+
+  api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.api
+    container_name: storepulse_api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      STOREPULSE_DB_URL: ${STOREPULSE_DB_URL}
+      STOREPULSE_DB_USERNAME: ${STOREPULSE_DB_USERNAME}
+      STOREPULSE_DB_PASSWORD: ${STOREPULSE_DB_PASSWORD}
+      STOREPULSE_SERVER_PORT: ${STOREPULSE_SERVER_PORT}
+      STOREPULSE_IMPORT_STORAGE_DIR: ${STOREPULSE_IMPORT_STORAGE_DIR}
+      STOREPULSE_MIN_DAILY_REVENUE: ${STOREPULSE_MIN_DAILY_REVENUE}
+      STOREPULSE_MIN_AVERAGE_BASKET: ${STOREPULSE_MIN_AVERAGE_BASKET}
+      STOREPULSE_ANALYTICS_RECOMPUTE_DELAY: ${STOREPULSE_ANALYTICS_RECOMPUTE_DELAY}
+      STOREPULSE_BOOTSTRAP_USERNAME: ${STOREPULSE_BOOTSTRAP_USERNAME}
+      STOREPULSE_BOOTSTRAP_PASSWORD: ${STOREPULSE_BOOTSTRAP_PASSWORD}
+      STOREPULSE_JWT_SECRET: ${STOREPULSE_JWT_SECRET}
+      STOREPULSE_JWT_EXPIRATION: ${STOREPULSE_JWT_EXPIRATION}
+      STOREPULSE_ALLOWED_ORIGIN: ${STOREPULSE_ALLOWED_ORIGIN}
+    ports:
+      - "${STOREPULSE_SERVER_PORT}:8080"
+    volumes:
+      - ../data/imports:/var/lib/storepulse/imports
+
+  web:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.web
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    container_name: storepulse_web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "4173:80"
 
 volumes:
   storepulse_pg:

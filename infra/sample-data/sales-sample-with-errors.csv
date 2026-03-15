@@ -1,0 +1,4 @@
+receipt_id,sold_at,product_sku,product_name,quantity,unit_price,total_amount
+R-2001,2026-03-16T11:00:00+02:00,SKU-BREAD,Bread,2,2.40,4.80
+R-2002,invalid-date,SKU-EGGS,Eggs,1,4.10,4.10
+R-2003,2026-03-16T11:30:00+02:00,SKU-CHEESE,Cheese,,6.90,6.90

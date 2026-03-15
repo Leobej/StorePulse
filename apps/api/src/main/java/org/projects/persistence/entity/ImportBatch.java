@@ -1,14 +1,14 @@
 package org.projects.persistence.entity;
 
 import jakarta.persistence.*;
-import org.projects.domain.ImportStatus;
 import org.projects.domain.ImportType;
+import org.projects.domain.ImportStatus;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table
+@Table(name = "import_batch")
 public class ImportBatch {
 
     @Id
@@ -23,11 +23,18 @@ public class ImportBatch {
     @Column(name = "status", nullable = false, length = 32)
     private ImportStatus importStatus;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "store_id", nullable = false)
+    private Store store;
+
     @Column(name = "file_path", nullable = false, length = 1024)
     private String filePath;
 
     @Column(name = "original_file_name", nullable = false, length = 255)
     private String originalFileName;
+
+    @Column(name = "file_checksum", nullable = false, length = 64)
+    private String fileChecksum;
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
@@ -38,15 +45,37 @@ public class ImportBatch {
     @Column(name = "error_message", length = 2000)
     private String errorMessage;
 
-    public ImportBatch(UUID id, ImportType importType, ImportStatus importStatus, String filePath, String originalFileName, OffsetDateTime createdAt) {
+    @Column(name = "processed_rows", nullable = false)
+    private int processedRows;
+
+    @Column(name = "successful_rows", nullable = false)
+    private int successfulRows;
+
+    @Column(name = "failed_rows", nullable = false)
+    private int failedRows;
+
+    public ImportBatch(
+        UUID id,
+        Store store,
+        ImportType importType,
+        ImportStatus importStatus,
+        String filePath,
+        String originalFileName,
+        String fileChecksum,
+        OffsetDateTime createdAt
+    ) {
         this.id = id;
+        this.store = store;
         this.importType = importType;
         this.importStatus = importStatus;
         this.filePath = filePath;
         this.originalFileName = originalFileName;
+        this.fileChecksum = fileChecksum;
         this.createdAt = createdAt;
         this.updatedAt = createdAt;
-        ;
+        this.processedRows = 0;
+        this.successfulRows = 0;
+        this.failedRows = 0;
     }
 
     public ImportBatch() {
@@ -62,6 +91,14 @@ public class ImportBatch {
 
     public ImportType getImportType() {
         return importType;
+    }
+
+    public Store getStore() {
+        return store;
+    }
+
+    public void setStore(Store store) {
+        this.store = store;
     }
 
     public void setImportType(ImportType importType) {
@@ -92,6 +129,14 @@ public class ImportBatch {
         this.originalFileName = originalFileName;
     }
 
+    public String getFileChecksum() {
+        return fileChecksum;
+    }
+
+    public void setFileChecksum(String fileChecksum) {
+        this.fileChecksum = fileChecksum;
+    }
+
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
@@ -114,5 +159,29 @@ public class ImportBatch {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public int getProcessedRows() {
+        return processedRows;
+    }
+
+    public void setProcessedRows(int processedRows) {
+        this.processedRows = processedRows;
+    }
+
+    public int getSuccessfulRows() {
+        return successfulRows;
+    }
+
+    public void setSuccessfulRows(int successfulRows) {
+        this.successfulRows = successfulRows;
+    }
+
+    public int getFailedRows() {
+        return failedRows;
+    }
+
+    public void setFailedRows(int failedRows) {
+        this.failedRows = failedRows;
     }
 }
